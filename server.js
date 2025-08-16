@@ -8,24 +8,32 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-// Read service account from env (one-line JSON)
-const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT);
-
-// ✅ Authenticate and initialize Earth Engine with the env key
-ee.data.authenticateViaPrivateKey(
-  serviceAccount,
-  () => {
-    ee.initialize(null, null, () => {
-      console.log('✅ Earth Engine initialized');
-    }, (err) => {
-      console.error('❌ Initialization error:', err);
-    });
-  },
-  (err) => {
-    console.error('❌ Authentication error:', err);
+// ✅ Authenticate Earth Engine
+let serviceAccount;
+try {
+  if (!process.env.SERVICE_ACCOUNT) {
+    throw new Error("SERVICE_ACCOUNT env variable is not set");
   }
-);
+  serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT);
 
+  ee.data.authenticateViaPrivateKey(
+    serviceAccount,
+    () => {
+      ee.initialize(null, null, () => {
+        console.log('✅ Earth Engine initialized');
+      }, (err) => {
+        console.error('❌ EE initialization error:', err);
+      });
+    },
+    (err) => {
+      console.error('❌ EE authentication error:', err);
+    }
+  );
+} catch (err) {
+  console.error("❌ Failed to parse SERVICE_ACCOUNT env variable:", err.message);
+}
+
+// ✅ NDVI endpoint
 app.post("/get-ndvi", async (req, res) => {
   const { lat, lon } = req.body;
   if (!lat || !lon) return res.status(400).json({ error: "lat and lon are required" });
@@ -80,12 +88,14 @@ app.post("/get-ndvi", async (req, res) => {
   }
 });
 
+// ✅ Root route
 app.get('/', (req, res) => {
   res.send('Backend is running!');
 });
 
-// ✅ Use Railway's assigned port
+// ✅ Start server (Railway PORT or local 5000)
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-app.listen(5000, () => console.log("Server running on http://localhost:5000"));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+
 
