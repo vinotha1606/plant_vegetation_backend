@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "NODE_OPTIONS=--openssl-legacy-provider node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "type": "commonjs",
@@ -17,9 +17,6 @@
     "express": "^5.1.0",
     "google-auth-library": "^10.1.0",
     "node-fetch": "^3.3.2"
-  },
-  "engines": {
-  "node": "16.20.2"
   }
 }
 
