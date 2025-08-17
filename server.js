@@ -14,7 +14,13 @@ try {
   if (!process.env.SERVICE_ACCOUNT) {
     throw new Error("SERVICE_ACCOUNT env variable is not set");
   }
+
   serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT);
+
+  // 🔑 Fix: replace literal "\n" with real newlines
+  if (serviceAccount.private_key) {
+    serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+  }
 
   ee.data.authenticateViaPrivateKey(
     serviceAccount,
@@ -96,6 +102,7 @@ app.get('/', (req, res) => {
 // ✅ Start server (Railway PORT or local 5000)
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
 
 
 
